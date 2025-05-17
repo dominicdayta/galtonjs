@@ -1,0 +1,30 @@
+{
+  "name": "galtonjs",
+  "version": "1.0.0",
+  "description": "A galton board in Node.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dominicdayta/galtonjs.git"
+  },
+  "keywords": [
+    "galton",
+    "normal",
+    "gaussian",
+    "central",
+    "limit",
+    "theorem"
+  ],
+  "author": "Dominic Dayta",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dominicdayta/galtonjs/issues"
+  },
+  "homepage": "https://github.com/dominicdayta/galtonjs#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

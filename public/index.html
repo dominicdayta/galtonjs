@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<body>
+	<canvas id="canvas" width="600" height="600"></canvas>
+	<script>
+		const canvas = document.getElementById("canvas");
+		const ctx = canvas.getContext("2d");
+
+		class Ball {
+			constructor() {
+				this.x = 300;
+				this.y = 50;
+				this.radius = 10;
+				this.dx = 0; 
+				this.dy = 0;
+				this.gravity = 0.5;
+				this.damping = 0.7;
+			}
+
+			update() {
+				this.dy += this.gravity;
+				this.x += this.dx;
+				this.y += this.dy;
+				
+				// Floor collision
+				if(this.y + this.radius > canvas.height){
+					this.y = canvas.height - this.radius;
+					this.dy *= -this.damping;
+				}
+			}
+
+			draw(){
+				ctx.beginPath();
+				ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+				ctx.fillStyle = 'blue';
+				ctx.fill();
+				ctx.closePath();
+			}
+		}
+
+		const ball = new Ball();
+		
+		function animate(){
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			ball.update();
+			ball.draw();
+			requestAnimationFrame(animate);
+		}
+
+		animate();
+	</script>
+</body>
+</html>
