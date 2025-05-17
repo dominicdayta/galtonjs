@@ -1,20 +1,23 @@
 <!DOCTYPE html>
 <html>
 <body>
-	<canvas id="canvas" width="600" height="600"></canvas>
+	<canvas id="canvas" width="800" height="600"></canvas>
 	<script>
 		const canvas = document.getElementById("canvas");
 		const ctx = canvas.getContext("2d");
 
+		ctx.strokeStyle = 'black';
+		ctx.stroke();
+
 		class Ball {
 			constructor() {
-				this.x = 300;
+				this.x = 400;
 				this.y = 50;
 				this.radius = 10;
 				this.dx = 0; 
 				this.dy = 0;
 				this.gravity = 0.2;
-				this.damping = 0.3;
+				this.damping = 0.1;
 			}
 
 			update() {
@@ -26,6 +29,12 @@
 				if(this.y + this.radius > canvas.height){
 					this.y = canvas.height - this.radius;
 					this.dy *= -this.damping;
+
+					obstacles.push({
+						type: "ball",
+						x: this.x, y: this.y,
+						width: this.radius, height: this.radius,
+					})
 				}
 			}
 
@@ -42,42 +51,86 @@
 					this.x - this.radius < obstacle.x + obstacle.width &&
 					this.y + this.radius > obstacle.y &&
 					this.y - this.radius < obstacle.y + obstacle.height){
-				
+					
 					this.y = obstacle.y - ball.radius;	
 					this.dy *= -this.damping;
 
-					if(Math.random() <= 0.5){
+					// if ball, bounce without shifting
+					if(obstacle.type==="ball"){
+						this.y = obstacle.y + obstacle.height;
+						return(true);
+					}
+
+					// else, if block, shift randomly to left or right
+					let randnum = Math.random();
+					console.log(randnum);
+					if(randnum <= 0.5){
 						this.x -= obstacle.width - this.radius - 5;
 					}else{
 						this.x += obstacle.width + this.radius + 5;
 					}
 					
+					return(true);
 				}	
 			}
 		}
 
-		const ball = new Ball();
-		const obstacle = {
-			x: 300,
-			y: 400,
-			width: 5, 
-			height: 20
-		}		
+		function generateObstacles() {
+			let obstacles = [];
+			for(let j=200; j < canvas.height; j++) {
+				if((j % 50 != 0) && (j < 550)) continue;
+				nudge = 0;
+					if(j % 100 == 0) nudge = 20;
+						for(let i=0; i < canvas.width; i++) {
+							if(i % 40 != 0) continue;
+							obstacles.push({
+								type: "block",
+								x: i + nudge, y: j,
+								width: 5, height: 10
+							});
+						}	
+			}
+			
+			return(obstacles)
+		}
 
 		function animate() {
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 			// draw obstacles
 			ctx.fillStyle = 'red';
-			ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-
+			obstacles.forEach(function(obstacle){	
+				if(obstacle.type === "block"){
+					ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+				}
+			});		
+	
 			// call to ball physics
-			ball.update();
-			ball.checkCollision(obstacle);
+			for(const ball of balls) {
+				ball.update();
+				obstacles.forEach(function(obstacle){
+					ball.checkCollision(obstacle);
+				});
 
-			ball.draw();
+				ball.draw();
+			}
 			requestAnimationFrame(animate);
 		}
+
+		const ball = new Ball(Math.random());
+		const balls = [];
+		const obstacles = generateObstacles();
+		let ballCount = 1;
+		const maxBalls = 5;
+		const interval = setInterval(()=>{
+			if(ballCount <= maxBalls) {
+				balls.push(new Ball());
+				ballCount++;
+				console.log(balls);
+			} else {
+				clearInterval(interval);
+			}
+		}, 1000);
 
 		animate();
 	</script>
