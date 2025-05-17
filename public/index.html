@@ -13,8 +13,8 @@
 				this.radius = 10;
 				this.dx = 0; 
 				this.dy = 0;
-				this.gravity = 0.5;
-				this.damping = 0.7;
+				this.gravity = 0.2;
+				this.damping = 0.3;
 			}
 
 			update() {
@@ -29,20 +29,52 @@
 				}
 			}
 
-			draw(){
+			draw() {
 				ctx.beginPath();
 				ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
 				ctx.fillStyle = 'blue';
 				ctx.fill();
 				ctx.closePath();
 			}
+
+			checkCollision(obstacle) {
+				if(this.x + this.radius > obstacle.x &&
+					this.x - this.radius < obstacle.x + obstacle.width &&
+					this.y + this.radius > obstacle.y &&
+					this.y - this.radius < obstacle.y + obstacle.height){
+				
+					this.y = obstacle.y - ball.radius;	
+					this.dy *= -this.damping;
+
+					if(Math.random() <= 0.5){
+						this.x -= obstacle.width - this.radius - 5;
+					}else{
+						this.x += obstacle.width + this.radius + 5;
+					}
+					
+				}	
+			}
 		}
 
 		const ball = new Ball();
-		
-		function animate(){
+		const obstacle = {
+			x: 300,
+			y: 400,
+			width: 5, 
+			height: 20
+		}		
+
+		function animate() {
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			// draw obstacles
+			ctx.fillStyle = 'red';
+			ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+
+			// call to ball physics
 			ball.update();
+			ball.checkCollision(obstacle);
+
 			ball.draw();
 			requestAnimationFrame(animate);
 		}
