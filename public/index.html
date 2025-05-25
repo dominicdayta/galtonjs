@@ -1,137 +1,103 @@
 <!DOCTYPE html>
 <html>
+	<head>
+		<title>GaltonJS</title>
+		<link rel="stylesheet" href="lib/css/bootstrap.min.css">
+		<script src="lib/js/bootstrap.bundle.min.js"></script>
+		<script src="lib/js/plotly-3.0.1.min.js" charset="utf-8"></script>
+	</head>
 <body>
-	<canvas id="canvas" width="800" height="600"></canvas>
+	<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="light">
+		<div class="container-fluid">
+			<a class="navbar-brand" href="#">Galton.JS</a>
+			<small>A Galton board written in plain Javascript.</small>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+			</button>
+		</div>
+	</nav>
+
+	<div style="height:3rem;"></div>
+
+	<div class="container">
+		<div class="row">
+			<div class="col col-md-4" style="height:500px">
+				<div class="card bg-secondary">
+					<div class="card-header">Header</div>
+					<div class="card-body">
+						<h4 class="card-title">Secondary card title</h4>
+						<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+					</div>
+				</div>
+			</div>
+			<div class="col col-md-8 d-flex align-items-center justify-content-center" style="height:500px">
+				<canvas id="canvas" width="400" height="500"></canvas>
+			</div>
+		</div>
+
+	</div>
+
+	<div style="height:3rem;"></div>
+	
+
 	<script>
 		const canvas = document.getElementById("canvas");
 		const ctx = canvas.getContext("2d");
-
-		ctx.strokeStyle = 'black';
-		ctx.stroke();
-
-		class Ball {
-			constructor() {
-				this.x = 400;
-				this.y = 50;
-				this.radius = 10;
-				this.dx = 0; 
-				this.dy = 0;
-				this.gravity = 0.2;
-				this.damping = 0.1;
-			}
-
-			update() {
-				this.dy += this.gravity;
-				this.x += this.dx;
-				this.y += this.dy;
-				
-				// Floor collision
-				if(this.y + this.radius > canvas.height){
-					this.y = canvas.height - this.radius;
-					this.dy *= -this.damping;
-
-					obstacles.push({
-						type: "ball",
-						x: this.x, y: this.y,
-						width: this.radius, height: this.radius,
-					})
-				}
-			}
-
-			draw() {
-				ctx.beginPath();
-				ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-				ctx.fillStyle = 'blue';
-				ctx.fill();
-				ctx.closePath();
-			}
-
-			checkCollision(obstacle) {
-				if(this.x + this.radius > obstacle.x &&
-					this.x - this.radius < obstacle.x + obstacle.width &&
-					this.y + this.radius > obstacle.y &&
-					this.y - this.radius < obstacle.y + obstacle.height){
-					
-					this.y = obstacle.y - ball.radius;	
-					this.dy *= -this.damping;
-
-					// if ball, bounce without shifting
-					if(obstacle.type==="ball"){
-						this.y = obstacle.y + obstacle.height;
-						return(true);
-					}
-
-					// else, if block, shift randomly to left or right
-					let randnum = Math.random();
-					console.log(randnum);
-					if(randnum <= 0.5){
-						this.x -= obstacle.width - this.radius - 5;
-					}else{
-						this.x += obstacle.width + this.radius + 5;
-					}
-					
-					return(true);
-				}	
-			}
-		}
-
-		function generateObstacles() {
+	
+		function generateObstacles(canvas) {
 			let obstacles = [];
-			for(let j=200; j < canvas.height; j++) {
-				if((j % 50 != 0) && (j < 550)) continue;
+	
+			for(let i=50; i < canvas.height - 50; i++){
 				nudge = 0;
-					if(j % 100 == 0) nudge = 20;
-						for(let i=0; i < canvas.width; i++) {
-							if(i % 40 != 0) continue;
-							obstacles.push({
-								type: "block",
-								x: i + nudge, y: j,
-								width: 5, height: 10
-							});
-						}	
+				if(i % 40 == 0){
+					nudge = 0;
+				}else if(i % 20 == 0 && i % 40 != 0){
+					nudge = 20;
+				}else{
+					continue;
+				}
+
+				for(let j=0; j < canvas.width; j++){
+				if(j % 40 != 0) continue;
+				obstacles.push({
+					type: "block",
+					x: j + nudge, y: i,
+					width:3, height:3
+				});
 			}
+
+			}
+			
 			
 			return(obstacles)
 		}
-
+	
 		function animate() {
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+	
 			// draw obstacles
-			ctx.fillStyle = 'red';
-			obstacles.forEach(function(obstacle){	
-				if(obstacle.type === "block"){
-					ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-				}
+			obstacles.forEach(function(obstacle){
+				ctx.fillStyle = '#36454F';
+				ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
 			});		
 	
-			// call to ball physics
-			for(const ball of balls) {
-				ball.update();
-				obstacles.forEach(function(obstacle){
-					ball.checkCollision(obstacle);
-				});
-
-				ball.draw();
-			}
 			requestAnimationFrame(animate);
 		}
-
-		const ball = new Ball(Math.random());
+	
 		const balls = [];
-		const obstacles = generateObstacles();
+		var obstacles = generateObstacles(canvas);
 		let ballCount = 1;
 		const maxBalls = 5;
 		const interval = setInterval(()=>{
 			if(ballCount <= maxBalls) {
-				balls.push(new Ball());
+				balls.push(new Ball(ballCount));
 				ballCount++;
 				console.log(balls);
 			} else {
 				clearInterval(interval);
 			}
 		}, 1000);
-
+	
 		animate();
 	</script>
 </body>
